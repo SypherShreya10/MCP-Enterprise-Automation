@@ -1,0 +1,244 @@
+                                            Table "public.res_users"
+      Column       |            Type             | Collation | Nullable |                Default                
+-------------------+-----------------------------+-----------+----------+---------------------------------------
+ id                | integer                     |           | not null | nextval('res_users_id_seq'::regclass)
+ company_id        | integer                     |           | not null | 
+ partner_id        | integer                     |           | not null | 
+ active            | boolean                     |           |          | true
+ create_date       | timestamp without time zone |           |          | 
+ login             | character varying           |           | not null | 
+ password          | character varying           |           |          | 
+ action_id         | integer                     |           |          | 
+ create_uid        | integer                     |           |          | 
+ write_uid         | integer                     |           |          | 
+ signature         | text                        |           |          | 
+ share             | boolean                     |           |          | 
+ write_date        | timestamp without time zone |           |          | 
+ totp_last_counter | integer                     |           |          | 
+ totp_secret       | character varying           |           |          | 
+ tour_enabled      | boolean                     |           |          | 
+Indexes:
+    "res_users_pkey" PRIMARY KEY, btree (id)
+    "res_users__partner_id_index" btree (partner_id)
+    "res_users_login_key" UNIQUE CONSTRAINT, btree (login)
+Foreign-key constraints:
+    "res_users_company_id_fkey" FOREIGN KEY (company_id) REFERENCES res_company(id) ON DELETE RESTRICT
+    "res_users_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    "res_users_partner_id_fkey" FOREIGN KEY (partner_id) REFERENCES res_partner(id) ON DELETE RESTRICT
+    "res_users_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+Referenced by:
+    TABLE "auth_passkey_key_create" CONSTRAINT "auth_passkey_key_create_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "auth_passkey_key" CONSTRAINT "auth_passkey_key_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "auth_passkey_key_create" CONSTRAINT "auth_passkey_key_create_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "auth_passkey_key" CONSTRAINT "auth_passkey_key_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "auth_totp_device" CONSTRAINT "auth_totp_device_user_id_fkey" FOREIGN KEY (user_id) REFERENCES res_users(id) ON DELETE CASCADE
+    TABLE "auth_totp_rate_limit_log" CONSTRAINT "auth_totp_rate_limit_log_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "auth_totp_rate_limit_log" CONSTRAINT "auth_totp_rate_limit_log_user_id_fkey" FOREIGN KEY (user_id) REFERENCES res_users(id) ON DELETE CASCADE
+    TABLE "auth_totp_rate_limit_log" CONSTRAINT "auth_totp_rate_limit_log_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "auth_totp_wizard" CONSTRAINT "auth_totp_wizard_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "auth_totp_wizard" CONSTRAINT "auth_totp_wizard_user_id_fkey" FOREIGN KEY (user_id) REFERENCES res_users(id) ON DELETE CASCADE
+    TABLE "auth_totp_wizard" CONSTRAINT "auth_totp_wizard_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_document_layout" CONSTRAINT "base_document_layout_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_document_layout" CONSTRAINT "base_document_layout_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_enable_profiling_wizard" CONSTRAINT "base_enable_profiling_wizard_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_enable_profiling_wizard" CONSTRAINT "base_enable_profiling_wizard_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_import_import" CONSTRAINT "base_import_import_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_import_import" CONSTRAINT "base_import_import_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_import_mapping" CONSTRAINT "base_import_mapping_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_import_mapping" CONSTRAINT "base_import_mapping_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_import_module" CONSTRAINT "base_import_module_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_import_module" CONSTRAINT "base_import_module_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_language_export" CONSTRAINT "base_language_export_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_language_export" CONSTRAINT "base_language_export_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_language_import" CONSTRAINT "base_language_import_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_language_import" CONSTRAINT "base_language_import_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_language_install" CONSTRAINT "base_language_install_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_language_install" CONSTRAINT "base_language_install_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_module_uninstall" CONSTRAINT "base_module_uninstall_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_module_uninstall" CONSTRAINT "base_module_uninstall_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_module_update" CONSTRAINT "base_module_update_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_module_update" CONSTRAINT "base_module_update_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_module_upgrade" CONSTRAINT "base_module_upgrade_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_module_upgrade" CONSTRAINT "base_module_upgrade_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_partner_merge_automatic_wizard" CONSTRAINT "base_partner_merge_automatic_wizard_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_partner_merge_automatic_wizard" CONSTRAINT "base_partner_merge_automatic_wizard_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_partner_merge_line" CONSTRAINT "base_partner_merge_line_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "base_partner_merge_line" CONSTRAINT "base_partner_merge_line_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "bus_bus" CONSTRAINT "bus_bus_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "bus_bus" CONSTRAINT "bus_bus_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "change_password_own" CONSTRAINT "change_password_own_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "change_password_own" CONSTRAINT "change_password_own_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "change_password_user" CONSTRAINT "change_password_user_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "change_password_user" CONSTRAINT "change_password_user_user_id_fkey" FOREIGN KEY (user_id) REFERENCES res_users(id) ON DELETE CASCADE
+    TABLE "change_password_user" CONSTRAINT "change_password_user_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "change_password_wizard" CONSTRAINT "change_password_wizard_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "change_password_wizard" CONSTRAINT "change_password_wizard_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "decimal_precision" CONSTRAINT "decimal_precision_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "decimal_precision" CONSTRAINT "decimal_precision_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "html_editor_converter_test" CONSTRAINT "html_editor_converter_test_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "html_editor_converter_test_sub" CONSTRAINT "html_editor_converter_test_sub_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "html_editor_converter_test_sub" CONSTRAINT "html_editor_converter_test_sub_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "html_editor_converter_test" CONSTRAINT "html_editor_converter_test_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "iap_account" CONSTRAINT "iap_account_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "iap_account_res_users_rel" CONSTRAINT "iap_account_res_users_rel_res_users_id_fkey" FOREIGN KEY (res_users_id) REFERENCES res_users(id) ON DELETE CASCADE
+    TABLE "iap_account" CONSTRAINT "iap_account_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "iap_service" CONSTRAINT "iap_service_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "iap_service" CONSTRAINT "iap_service_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_act_client" CONSTRAINT "ir_act_client_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_act_client" CONSTRAINT "ir_act_client_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_act_report_xml" CONSTRAINT "ir_act_report_xml_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_act_report_xml" CONSTRAINT "ir_act_report_xml_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_act_server" CONSTRAINT "ir_act_server_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_act_server" CONSTRAINT "ir_act_server_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_act_url" CONSTRAINT "ir_act_url_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_act_url" CONSTRAINT "ir_act_url_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_act_window" CONSTRAINT "ir_act_window_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_act_window_view" CONSTRAINT "ir_act_window_view_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_act_window_view" CONSTRAINT "ir_act_window_view_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_act_window" CONSTRAINT "ir_act_window_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_actions" CONSTRAINT "ir_actions_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_actions_server_history" CONSTRAINT "ir_actions_server_history_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_actions_server_history" CONSTRAINT "ir_actions_server_history_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_actions_todo" CONSTRAINT "ir_actions_todo_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_actions_todo" CONSTRAINT "ir_actions_todo_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_actions" CONSTRAINT "ir_actions_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_asset" CONSTRAINT "ir_asset_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_asset" CONSTRAINT "ir_asset_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_attachment" CONSTRAINT "ir_attachment_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_attachment" CONSTRAINT "ir_attachment_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_config_parameter" CONSTRAINT "ir_config_parameter_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_config_parameter" CONSTRAINT "ir_config_parameter_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_cron" CONSTRAINT "ir_cron_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_cron_progress" CONSTRAINT "ir_cron_progress_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_cron_progress" CONSTRAINT "ir_cron_progress_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_cron_trigger" CONSTRAINT "ir_cron_trigger_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_cron_trigger" CONSTRAINT "ir_cron_trigger_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_cron" CONSTRAINT "ir_cron_user_id_fkey" FOREIGN KEY (user_id) REFERENCES res_users(id) ON DELETE RESTRICT
+    TABLE "ir_cron" CONSTRAINT "ir_cron_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_default" CONSTRAINT "ir_default_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_default" CONSTRAINT "ir_default_user_id_fkey" FOREIGN KEY (user_id) REFERENCES res_users(id) ON DELETE CASCADE
+    TABLE "ir_default" CONSTRAINT "ir_default_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_demo" CONSTRAINT "ir_demo_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_demo_failure" CONSTRAINT "ir_demo_failure_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_demo_failure_wizard" CONSTRAINT "ir_demo_failure_wizard_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_demo_failure_wizard" CONSTRAINT "ir_demo_failure_wizard_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_demo_failure" CONSTRAINT "ir_demo_failure_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_demo" CONSTRAINT "ir_demo_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_embedded_actions" CONSTRAINT "ir_embedded_actions_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_embedded_actions" CONSTRAINT "ir_embedded_actions_user_id_fkey" FOREIGN KEY (user_id) REFERENCES res_users(id) ON DELETE CASCADE
+    TABLE "ir_embedded_actions" CONSTRAINT "ir_embedded_actions_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_exports" CONSTRAINT "ir_exports_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_exports_line" CONSTRAINT "ir_exports_line_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_exports_line" CONSTRAINT "ir_exports_line_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_exports" CONSTRAINT "ir_exports_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_filters" CONSTRAINT "ir_filters_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_filters_res_users_rel" CONSTRAINT "ir_filters_res_users_rel_res_users_id_fkey" FOREIGN KEY (res_users_id) REFERENCES res_users(id) ON DELETE CASCADE
+    TABLE "ir_filters" CONSTRAINT "ir_filters_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_mail_server" CONSTRAINT "ir_mail_server_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_mail_server" CONSTRAINT "ir_mail_server_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_model_access" CONSTRAINT "ir_model_access_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_model_access" CONSTRAINT "ir_model_access_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_model_constraint" CONSTRAINT "ir_model_constraint_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_model_constraint" CONSTRAINT "ir_model_constraint_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_model" CONSTRAINT "ir_model_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_model_data" CONSTRAINT "ir_model_data_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_model_data" CONSTRAINT "ir_model_data_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_model_fields" CONSTRAINT "ir_model_fields_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_model_fields_selection" CONSTRAINT "ir_model_fields_selection_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_model_fields_selection" CONSTRAINT "ir_model_fields_selection_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_model_fields" CONSTRAINT "ir_model_fields_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_model_relation" CONSTRAINT "ir_model_relation_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_model_relation" CONSTRAINT "ir_model_relation_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_model" CONSTRAINT "ir_model_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_module_category" CONSTRAINT "ir_module_category_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_module_category" CONSTRAINT "ir_module_category_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_module_module" CONSTRAINT "ir_module_module_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_module_module_exclusion" CONSTRAINT "ir_module_module_exclusion_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_module_module_exclusion" CONSTRAINT "ir_module_module_exclusion_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_module_module" CONSTRAINT "ir_module_module_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_rule" CONSTRAINT "ir_rule_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_rule" CONSTRAINT "ir_rule_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_sequence" CONSTRAINT "ir_sequence_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_sequence_date_range" CONSTRAINT "ir_sequence_date_range_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_sequence_date_range" CONSTRAINT "ir_sequence_date_range_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_sequence" CONSTRAINT "ir_sequence_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_ui_menu" CONSTRAINT "ir_ui_menu_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_ui_menu" CONSTRAINT "ir_ui_menu_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_ui_view" CONSTRAINT "ir_ui_view_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_ui_view_custom" CONSTRAINT "ir_ui_view_custom_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_ui_view_custom" CONSTRAINT "ir_ui_view_custom_user_id_fkey" FOREIGN KEY (user_id) REFERENCES res_users(id) ON DELETE CASCADE
+    TABLE "ir_ui_view_custom" CONSTRAINT "ir_ui_view_custom_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "ir_ui_view" CONSTRAINT "ir_ui_view_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "properties_base_definition" CONSTRAINT "properties_base_definition_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "properties_base_definition" CONSTRAINT "properties_base_definition_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "report_layout" CONSTRAINT "report_layout_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "report_layout" CONSTRAINT "report_layout_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "report_paperformat" CONSTRAINT "report_paperformat_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "report_paperformat" CONSTRAINT "report_paperformat_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_bank" CONSTRAINT "res_bank_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_bank" CONSTRAINT "res_bank_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_company" CONSTRAINT "res_company_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_company_users_rel" CONSTRAINT "res_company_users_rel_user_id_fkey" FOREIGN KEY (user_id) REFERENCES res_users(id) ON DELETE CASCADE
+    TABLE "res_company" CONSTRAINT "res_company_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_config" CONSTRAINT "res_config_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_config_settings" CONSTRAINT "res_config_settings_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_config_settings" CONSTRAINT "res_config_settings_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_config" CONSTRAINT "res_config_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_country" CONSTRAINT "res_country_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_country_group" CONSTRAINT "res_country_group_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_country_group" CONSTRAINT "res_country_group_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_country_state" CONSTRAINT "res_country_state_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_country_state" CONSTRAINT "res_country_state_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_country" CONSTRAINT "res_country_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_currency" CONSTRAINT "res_currency_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_currency_rate" CONSTRAINT "res_currency_rate_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_currency_rate" CONSTRAINT "res_currency_rate_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_currency" CONSTRAINT "res_currency_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_device_log" CONSTRAINT "res_device_log_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_device_log" CONSTRAINT "res_device_log_user_id_fkey" FOREIGN KEY (user_id) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_device_log" CONSTRAINT "res_device_log_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_groups" CONSTRAINT "res_groups_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_groups_privilege" CONSTRAINT "res_groups_privilege_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_groups_privilege" CONSTRAINT "res_groups_privilege_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_groups_users_rel" CONSTRAINT "res_groups_users_rel_uid_fkey" FOREIGN KEY (uid) REFERENCES res_users(id) ON DELETE CASCADE
+    TABLE "res_groups" CONSTRAINT "res_groups_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_lang" CONSTRAINT "res_lang_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_lang" CONSTRAINT "res_lang_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_partner_bank" CONSTRAINT "res_partner_bank_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_partner_bank" CONSTRAINT "res_partner_bank_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_partner_category" CONSTRAINT "res_partner_category_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_partner_category" CONSTRAINT "res_partner_category_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_partner" CONSTRAINT "res_partner_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_partner_industry" CONSTRAINT "res_partner_industry_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_partner_industry" CONSTRAINT "res_partner_industry_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_partner" CONSTRAINT "res_partner_user_id_fkey" FOREIGN KEY (user_id) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_partner" CONSTRAINT "res_partner_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_users_apikeys_description" CONSTRAINT "res_users_apikeys_description_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_users_apikeys_description" CONSTRAINT "res_users_apikeys_description_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_users_apikeys" CONSTRAINT "res_users_apikeys_user_id_fkey" FOREIGN KEY (user_id) REFERENCES res_users(id) ON DELETE CASCADE
+    TABLE "res_users" CONSTRAINT "res_users_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_users_deletion" CONSTRAINT "res_users_deletion_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_users_deletion" CONSTRAINT "res_users_deletion_user_id_fkey" FOREIGN KEY (user_id) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_users_deletion" CONSTRAINT "res_users_deletion_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_users_identitycheck" CONSTRAINT "res_users_identitycheck_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_users_identitycheck" CONSTRAINT "res_users_identitycheck_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_users_log" CONSTRAINT "res_users_log_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_users_log" CONSTRAINT "res_users_log_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_users_settings" CONSTRAINT "res_users_settings_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_users_settings_embedded_action" CONSTRAINT "res_users_settings_embedded_action_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_users_settings_embedded_action" CONSTRAINT "res_users_settings_embedded_action_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_users_settings" CONSTRAINT "res_users_settings_user_id_fkey" FOREIGN KEY (user_id) REFERENCES res_users(id) ON DELETE CASCADE
+    TABLE "res_users_settings" CONSTRAINT "res_users_settings_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "res_users_web_tour_tour_rel" CONSTRAINT "res_users_web_tour_tour_rel_res_users_id_fkey" FOREIGN KEY (res_users_id) REFERENCES res_users(id) ON DELETE CASCADE
+    TABLE "res_users" CONSTRAINT "res_users_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "reset_view_arch_wizard" CONSTRAINT "reset_view_arch_wizard_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "reset_view_arch_wizard" CONSTRAINT "reset_view_arch_wizard_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "server_action_history_wizard" CONSTRAINT "server_action_history_wizard_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "server_action_history_wizard" CONSTRAINT "server_action_history_wizard_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "web_tour_tour" CONSTRAINT "web_tour_tour_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "web_tour_tour_step" CONSTRAINT "web_tour_tour_step_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "web_tour_tour_step" CONSTRAINT "web_tour_tour_step_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "web_tour_tour" CONSTRAINT "web_tour_tour_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "wizard_ir_model_menu_create" CONSTRAINT "wizard_ir_model_menu_create_create_uid_fkey" FOREIGN KEY (create_uid) REFERENCES res_users(id) ON DELETE SET NULL
+    TABLE "wizard_ir_model_menu_create" CONSTRAINT "wizard_ir_model_menu_create_write_uid_fkey" FOREIGN KEY (write_uid) REFERENCES res_users(id) ON DELETE SET NULL
+
