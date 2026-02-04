@@ -1,0 +1,34 @@
+docker exec -it db psql -U odoo -d postgres => logs in into the oddo db with the username and pass
+
+\l => for seeing what tables are present in the db
+
+\c dummyERP => enter into the dummyERP database
+
+\dt => list all the tables in the dummyERP db
+
+About the oddo container description in the infra_notes.md:
+1️⃣ Odoo Application Container
+What this means
+This section answers one question:
+“What is Odoo allowed to do in this system?”
+Your answers say:
+Odoo is the brain
+It owns business logic
+It talks to the database
+Humans interact with it via port 8069
+AI does not
+
+Why this matters
+Later, when someone asks:
+“Why can’t the agent just create records directly?”
+“Why not bypass Odoo and write SQL?”
+You point here and say:
+“Because Odoo is the only writer of business data.”
+
+This prevents:
+data corruption
+broken workflows
+orphaned records
+silent inconsistencies
+This section establishes authority.
+

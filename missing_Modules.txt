@@ -1,0 +1,119 @@
+Based on the problem statement requirements ("automate complex business processes"), missing critical operational models are:
+1. INVENTORY/STOCK MANAGEMENT (ERP Core)
+Missing Models:
+product.product ⚠️ CRITICAL MISSING
+
+Why you need it: The entire problem statement talks about "Can we fulfill 200 units of Product X?"
+What it does: Stores all product information (name, price, type, category)
+Without it: You can't answer "What products do we have?" or "What's the price?"
+Priority: HIGHEST - This is fundamental to ERP
+
+product.template ⚠️ CRITICAL MISSING
+
+Why you need it: Product variants and master product data
+What it does: Template for products (one template can have multiple variants)
+Without it: Can't understand product structure
+Priority: HIGH
+
+stock.quant ⚠️ CRITICAL MISSING
+
+Why you need it: The problem asks "Do we have inventory?" "Can we deliver 200 units?"
+What it does: Actual inventory quantities by location
+Without it: You have NO WAY to check stock levels
+Priority: HIGHEST - Can't do inventory checks without this
+
+stock.location ⚠️ IMPORTANT MISSING
+
+Why you need it: "Check inventory at Warehouse A"
+What it does: Warehouse locations, storage areas
+Without it: Can't know where stock is located
+Priority: HIGH
+
+stock.move ⚠️ IMPORTANT MISSING
+
+Why you need it: Track inventory movements, understand why stock changed
+What it does: Records all inventory movements (incoming, outgoing, internal)
+Without it: Can't track inventory history
+Priority: MEDIUM
+
+
+2. SALES/ORDER MANAGEMENT (ERP Core)
+sale.order ⚠️ CRITICAL MISSING
+
+Why you need it: Problem statement: "Can we fulfill AutoCorp's order for 200 units?"
+What it does: Sales orders (customer orders)
+Without it: You can't CREATE orders, check order status, or track sales
+Priority: HIGHEST - This is the main business transaction
+
+sale.order.line ⚠️ CRITICAL MISSING
+
+Why you need it: Orders have multiple products
+What it does: Individual line items in a sales order (product, quantity, price)
+Without it: Can't see WHAT was ordered, just that an order exists
+Priority: HIGHEST
+
+
+3. PURCHASING (ERP)
+purchase.order ⚠️ IMPORTANT MISSING
+
+Why you need it: Problem mentions checking "supplier lead times", "material availability"
+What it does: Purchase orders to suppliers
+Without it: Can't check incoming materials from suppliers
+Priority: MEDIUM-HIGH
+
+purchase.order.line
+
+Why you need it: Purchase order details
+What it does: Line items in purchase orders
+Priority: MEDIUM
+
+
+4. MANUFACTURING (If MRP module installed)
+mrp.production
+
+Why you need it: Problem asks "check manufacturing capacity", "can we manufacture 150 units?"
+What it does: Manufacturing orders
+Without it: Can't check production schedule
+Priority: MEDIUM (only if you have MRP module)
+
+mrp.bom (Bill of Materials)
+
+Why you need it: Know what materials needed to manufacture
+What it does: Lists materials/components needed for production
+Priority: MEDIUM (only with MRP)
+
+
+5. ACCOUNTING/FINANCE
+account.move ⚠️ IMPORTANT MISSING
+
+Why you need it: Problem mentions "customer credit", "payment history"
+What it does: Invoices and payments
+Without it: Can't check if customer paid, invoice status
+Priority: MEDIUM-HIGH
+
+account.payment
+
+Why you need it: Track actual payments
+What it does: Payment records
+Priority: MEDIUM
+
+
+6. HR EXTENSIONS
+hr.leave ⚠️ IMPORTANT MISSING
+
+Why you need it: Problem asks "Is employee available?", "employees on vacation"
+What it does: Time off requests and approvals
+Without it: Can't check employee availability
+Priority: HIGH
+
+hr.attendance
+
+Why you need it: Check if employee is working
+What it does: Clock in/out records
+Priority: MEDIUM
+
+hr.contract
+
+Why you need it: Employee salary, contract details
+What it does: Employment contracts
+Priority: MEDIUM (if you need salary info)
