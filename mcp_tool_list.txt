@@ -1,0 +1,1075 @@
+================================================================================
+MCP TOOL LIST — ODOO ENTERPRISE INTEGRATION
+================================================================================
+Version: 2.0
+Last Updated: 2025-01-25
+Purpose: Complete tool set for enterprise business process automation
+
+This file defines ALL tools exposed via MCP server for AI agent consumption.
+Tools are organized by business domain and risk level.
+Each tool must comply with ai_safety_execution_notes.md
+
+Global Constraints:
+- Maximum 100 records per query
+- All queries scoped to current company
+- No delete operations
+- No bulk operations
+- All operations logged
+
+================================================================================
+SECTION 1: IDENTITY & ACCESS MANAGEMENT (Core Foundation)
+================================================================================
+Risk Level: LOW (Read Only) | HIGH (Write Restricted)
+
+────────────────────────────────────────────────────────────────────────────────
+✅Tool ID: 001
+Tool Name: get_partner
+────────────────────────────────────────────────────────────────────────────────
+Model: res.partner
+Purpose: Retrieve contact/customer/supplier details
+Business Use Case: "Who is customer AutoCorp?" "Get supplier contact info"
+
+Parameters:
+  - partner_id (optional, int): Specific partner ID
+  - name (optional, string): Search by name (partial match)
+  - email (optional, string): Search by email
+  - is_customer (optional, bool): Filter customers only
+  - is_supplier (optional, bool): Filter suppliers only
+  - limit (optional, int, default=10, max=100): Result limit
+
+Returns:
+  - id, name, email, phone, street, city, country_id
+  - is_customer, is_supplier
+  - credit_limit (if customer)
+  - parent_id (if part of organization)
+
+Domain Restrictions:
+  - active = True
+  - company_id = current_company OR company_id is NULL
+
+Example Queries:
+  - Get specific: partner_id=123
+  - Search: name="AutoCorp"
+  - List customers: is_customer=True, limit=50
+
+Why Required:
+  Critical for identifying customers in sales workflows and suppliers
+  in procurement. Foundation for all customer-facing operations.
+
+────────────────────────────────────────────────────────────────────────────────
+✅Tool ID: 002
+Tool Name: create_partner
+────────────────────────────────────────────────────────────────────────────────
+Model: res.partner
+Purpose: Create new contact/customer/supplier
+Business Use Case: "Add new customer TechCorp" "Register new supplier"
+
+Risk Level: MEDIUM (Create Only)
+
+Parameters (Required):
+  - name (string, required): Partner name
+  - email (string, optional but recommended)
+  - phone (string, optional)
+  - is_customer (bool, default=False)
+  - is_supplier (bool, default=False)
+
+Parameters (Optional):
+  - street, city, zip, country_id
+  - credit_limit (if is_customer=True)
+
+Forbidden Parameters:
+  - company_id (auto-set to current)
+  - user_id, create_uid, write_uid (auto-managed)
+  - Any internal security fields
+
+Returns:
+  - Created partner_id
+  - Confirmation message
+
+Validation Rules:
+  - Name must be unique within company
+  - Email format validation if provided
+  - Credit limit must be positive if specified
+
+Why Required:
+  Enables AI to register new business contacts during workflows
+  (e.g., customer calls in, doesn't exist in system yet)
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 003
+Tool Name: get_user
+────────────────────────────────────────────────────────────────────────────────
+Model: res.users
+Purpose: Get system user information (read-only, audit purposes)
+Business Use Case: "Who is the sales manager?" "Find user by email"
+
+Risk Level: LOW (Read Only)
+
+Parameters:
+  - user_id (optional, int): Specific user
+  - login (optional, string): Search by login/email
+  - name (optional, string): Search by name
+
+Returns:
+  - id, name, login, partner_id
+  - company_id, company_ids
+  - active status
+
+Domain Restrictions:
+  - active = True
+  - share = False (internal users only, no portal users)
+
+Forbidden Returns:
+  - password, api_key, auth tokens
+  - security group details
+
+Why Required:
+  Identify responsible users for task assignment and workflow routing.
+  Critical for "assign to sales manager" type operations.
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 004
+Tool Name: get_company
+────────────────────────────────────────────────────────────────────────────────
+Model: res.company
+Purpose: Get company/organization information
+Business Use Case: "What's our company currency?" "Get company details"
+
+Risk Level: LOW (Read Only)
+
+Parameters:
+  - company_id (optional, int): Specific company (defaults to current)
+
+Returns:
+  - id, name, currency_id, email, phone
+  - street, city, country_id
+
+Why Required:
+  Context for multi-company operations, currency calculations,
+  company information for documents.
+
+
+================================================================================
+SECTION 2: HR / EMPLOYEE MANAGEMENT
+================================================================================
+Risk Level: LOW (Read Only for sensitive HR data)
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 005
+Tool Name: get_employee
+────────────────────────────────────────────────────────────────────────────────
+Model: hr.employee
+Purpose: Get employee information
+Business Use Case: "Who is Sarah Chen?" "Find employees in Engineering dept"
+
+Risk Level: LOW (Read Only, sensitive data excluded)
+
+Parameters:
+  - employee_id (optional, int): Specific employee
+  - name (optional, string): Search by name
+  - department_id (optional, int): Filter by department
+  - job_id (optional, int): Filter by job role
+  - limit (optional, int, default=10, max=100)
+
+Returns:
+  - id, name, job_id, job_title
+  - department_id, department_name
+  - parent_id (manager), work_email, work_phone
+  - active status
+
+Forbidden Returns:
+  - private_email, private_phone
+  - identification numbers (SSN, passport, etc.)
+  - salary, wage information
+  - bank account details
+  - private addresses
+
+Domain Restrictions:
+  - active = True
+  - company_id = current_company
+
+Why Required:
+  Essential for resource allocation, task assignment, org chart queries.
+  Must exclude sensitive personal data per GDPR/privacy regulations.
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 006
+Tool Name: get_department
+────────────────────────────────────────────────────────────────────────────────
+Model: hr.department
+Purpose: Get department structure
+Business Use Case: "List all departments" "Who manages Engineering?"
+
+Returns:
+  - id, name, manager_id, parent_id, company_id
+
+Why Required:
+  Organizational context for routing workflows, understanding structure.
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 007
+Tool Name: get_job
+────────────────────────────────────────────────────────────────────────────────
+Model: hr.job
+Purpose: Get job role definitions
+Business Use Case: "What job positions exist?" "Job requirements for role X"
+
+Returns:
+  - id, name, department_id, description
+
+Why Required:
+  Understanding organizational roles and requirements.
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 008
+Tool Name: get_employee_leaves
+────────────────────────────────────────────────────────────────────────────────
+Model: hr.leave
+Purpose: Check employee time off and availability
+Business Use Case: "Is John on vacation next week?" "Who's available Dec 15?"
+
+Risk Level: LOW (Read Only)
+
+Parameters:
+  - employee_id (optional, int): Specific employee
+  - date_from (optional, date): Leave start date filter
+  - date_to (optional, date): Leave end date filter
+  - state (optional, string): Filter by state (validate=approved only)
+
+Returns:
+  - id, employee_id, employee_name
+  - date_from, date_to, number_of_days
+  - holiday_status_id (leave type: sick, vacation, etc.)
+  - state (draft/confirm/validate/refuse)
+
+Domain Restrictions:
+  - company_id = current_company
+  - state = 'validate' (approved leaves only for planning)
+
+Why Required:
+  CRITICAL for resource planning. Can't assign overtime or tasks
+  to employees on approved leave. Prevents scheduling conflicts.
+
+────────────────────────────────────────────────────────────────────────────────
+✅Tool ID: 009 
+Tool Name: check_employee_availability
+────────────────────────────────────────────────────────────────────────────────
+Model: hr.employee + hr.leave (COMPOSITE TOOL)
+Purpose: Check if specific employee available on specific dates
+Business Use Case: "Can John work overtime Dec 20-22?"
+
+Risk Level: LOW (Read Only, combines data)
+
+Parameters:
+  - employee_id (int, required): Employee to check
+  - date_from (date, required): Start date 
+ - date_to (date, required): End date
+
+Returns:
+  - employee_id, employee_name
+  - is_available (boolean)
+  - conflicting_leaves (if any): list of leave periods
+  - available_days: count of days available in range
+
+Logic:
+  1. Get employee info (verify active)
+  2. Check hr.leave for approved leaves in date range
+  3. Calculate overlap
+  4. Return availability summary
+
+Why Required:
+  Single-call answer to "Is X available?" instead of making
+  AI manually check leave records. Essential for resource planning.
+
+────────────────────────────────────────────────────────────────────────────────
+✅Tool ID: 010 
+Tool Name: get_employee_attendance
+────────────────────────────────────────────────────────────────────────────────
+Model: hr.attendance
+Purpose: Check employee clock-in/out records
+Business Use Case: "Is employee currently working?" "Who's in office today?"
+
+Parameters:
+  - employee_id (optional, int): Specific employee
+  - date (optional, date): Filter by date
+
+Returns:
+  - employee_id, check_in, check_out
+  - worked_hours
+
+Domain Restrictions:
+  - company_id = current_company
+
+Why Required:
+  Real-time workforce visibility. Knowing who's actually working now.
+
+
+================================================================================
+SECTION 3: CRM / SALES PIPELINE
+================================================================================
+Risk Level: LOW (Read) | MEDIUM (Create) | HIGH (Update stage only)
+
+────────────────────────────────────────────────────────────────────────────────
+✅Tool ID: 011
+Tool Name: get_lead
+────────────────────────────────────────────────────────────────────────────────
+Model: crm.lead
+Purpose: Get sales opportunity/lead details
+Business Use Case: "Show me open opportunities" "Get lead details for X"
+
+Parameters:
+  - lead_id (optional, int): Specific lead
+  - partner_id (optional, int): Filter by customer
+  - stage_id (optional, int): Filter by pipeline stage
+  - user_id (optional, int): Filter by assigned salesperson
+  - type (optional, string): 'lead' or 'opportunity'
+  - limit (optional, int, default=10, max=100)
+
+Returns:
+  - id, name, partner_id, partner_name
+  - expected_revenue, probability
+  - stage_id, stage_name
+  - user_id (assigned salesperson)
+  - date_deadline, create_date
+
+Domain Restrictions:
+  - company_id = current_company
+  - active = True
+
+Why Required:
+  Core CRM functionality. Tracking sales pipeline, forecasting revenue.
+
+────────────────────────────────────────────────────────────────────────────────
+✅ Tool ID: 012
+Tool Name: update_lead_stage
+────────────────────────────────────────────────────────────────────────────────
+Model: crm.lead
+Purpose: Move opportunity through sales pipeline
+Business Use Case: "Mark opportunity as won" "Move to negotiation stage"
+
+Risk Level: HIGH (Update, but controlled)
+
+Parameters:
+  - lead_id (int, required): Lead to update
+  - stage_id (int, required): New stage
+
+Allowed Updates:
+  - stage_id ONLY
+
+Forbidden Updates:
+  - ANY other field
+
+Validation:
+  - Lead must exist and be active
+  - Stage must exist and be valid for the lead's team
+  - Lead must not be archived
+
+Returns:
+  - Updated lead_id, new stage_id, stage_name
+  - Confirmation message
+
+Why Required:
+  Essential CRM automation. AI can progress deals through pipeline
+  based on triggers (e.g., customer confirmed, contract signed).
+  This is the ONLY update operation allowed for safety.
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 013
+Tool Name: get_stage
+────────────────────────────────────────────────────────────────────────────────
+Model: crm.stage
+Purpose: Get sales pipeline stages
+Business Use Case: "What are our sales stages?" "What's the won stage ID?"
+
+Returns:
+  - id, name, sequence, is_won, fold
+
+Why Required:
+  Reference data for understanding pipeline structure.
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 014
+Tool Name: get_team
+────────────────────────────────────────────────────────────────────────────────
+Model: crm.team
+Purpose: Get sales team information
+Business Use Case: "Who's on the Enterprise Sales team?"
+
+Returns:
+  - id, name, user_id (team leader), member_ids
+
+Why Required:
+  Team-based reporting and opportunity assignment.
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 015
+Tool Name: create_activity
+────────────────────────────────────────────────────────────────────────────────
+Model: mail.activity
+Purpose: Create follow-up task/reminder
+Business Use Case: "Remind John to call customer tomorrow"
+
+Risk Level: MEDIUM (Create Only)
+
+Parameters (Required):
+  - activity_type_id (int): Type of activity (call, meeting, email, etc.)
+  - user_id (int): Assigned user
+  - date_deadline (date): Due date
+  - res_model (string): Related model (e.g., 'crm.lead', 'sale.order')
+  - res_id (int): Related record ID
+
+Parameters (Optional):
+  - summary (string): Activity description
+  - note (text): Detailed notes
+
+Forbidden Operations:
+  - Auto-completion (state must remain 'planned')
+  - Assigning to inactive users
+
+Returns:
+  - Created activity_id
+  - Confirmation with assignee and deadline
+
+Why Required:
+  Critical for workflow automation. AI can schedule follow-ups
+  when specific conditions met (e.g., no response in 3 days).
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 016
+Tool Name: get_activity
+────────────────────────────────────────────────────────────────────────────────
+Model: mail.activity
+Purpose: Get scheduled activities/tasks
+Business Use Case: "What tasks are due today?" "Show John's pending tasks"
+
+Parameters:
+  - user_id (optional, int): Filter by assigned user
+  - res_model (optional, string): Filter by related model
+  - date_deadline (optional, date): Filter by due date
+
+Returns:
+  - id, activity_type_id, user_id, date_deadline
+  - summary, res_model, res_id, state
+
+Why Required:
+  Task tracking and workflow monitoring.
+
+
+================================================================================
+SECTION 4: INVENTORY / STOCK MANAGEMENT
+================================================================================
+Risk Level: LOW (Read Only) - No inventory adjustments allowed
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 017
+Tool Name: get_product
+────────────────────────────────────────────────────────────────────────────────
+Model: product.product
+Purpose: Get product details
+Business Use Case: "What's the price of Product X?" "Find product by code"
+
+Risk Level: LOW (Read Only)
+
+Parameters:
+  - product_id (optional, int): Specific product
+  - name (optional, string): Search by name
+  - default_code (optional, string): Search by internal reference
+  - categ_id (optional, int): Filter by category
+  - type (optional, string): Filter by type (product/service/consu)
+  - limit (optional, int, default=10, max=100)
+
+Returns:
+  - id, name, default_code (SKU)
+  - list_price (selling price)
+  - type (product/service/consu)
+  - categ_id, categ_name
+  - uom_id (unit of measure)
+  - active, sale_ok, purchase_ok
+
+Forbidden Returns:
+  - standard_price (cost) - competitive info
+  - Internal costing fields
+  - Supplier-specific pricing
+
+Domain Restrictions:
+  - active = True
+  - sale_ok = True (sellable products only)
+
+Why Required:
+  FUNDAMENTAL to any order processing. Can't create orders
+  without knowing product IDs and prices.
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 018
+Tool Name: get_product_stock
+────────────────────────────────────────────────────────────────────────────────
+Model: stock.quant
+Purpose: Check inventory quantity for a product
+Business Use Case: "Do we have 100 units in stock?" "Check warehouse inventory"
+
+Risk Level: LOW (Read Only)
+
+Parameters:
+  - product_id (int, required): Product to check
+  - location_id (optional, int): Specific warehouse/location
+
+Returns:
+  - product_id, product_name
+  - location_id, location_name
+  - quantity (available quantity)
+  - reserved_quantity
+  - available_quantity (quantity - reserved_quantity)
+
+Domain Restrictions:
+  - company_id = current_company
+  - quantity > 0 (only show locations with stock)
+  - location_id.usage = 'internal' (warehouse locations only)
+
+Aggregation:
+  If location_id not specified, sum quantities across all warehouses
+
+Why Required:
+  CRITICAL for order fulfillment. Core question: "Can we deliver X units?"
+  Without this, can't answer basic inventory questions.
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 019
+Tool Name: check_product_availability
+────────────────────────────────────────────────────────────────────────────────
+Model: product.product + stock.quant (COMPOSITE TOOL)
+Purpose: Can we deliver X units of product Y by date Z?
+Business Use Case: "Can we fulfill order for 200 units by Dec 15?"
+
+Risk Level: LOW (Read Only, combines data)
+
+Parameters:
+  - product_id (int, required): Product to check
+  - quantity (float, required): Required quantity
+  - date_required (date, optional): Delivery date
+
+Returns:
+  - product_id, product_name
+  - requested_quantity
+  - current_stock (total available)
+  - can_fulfill (boolean)
+  - shortage (if can_fulfill=False): quantity short
+  - recommended_action (string): e.g., "Order from supplier" or "Manufacture"
+
+Logic:
+  1. Get product details
+  2. Check total stock across all locations
+  3. Subtract reserved quantities
+  4. Compare available vs requested
+  5. If shortage, check purchase orders in transit (if date_required provided)
+  6. Return comprehensive availability status
+
+Why Required:
+  Single-call answer to the #1 business question: "Can we deliver?"
+  Saves AI from making multiple queries and doing calculations.
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 020
+Tool Name: get_stock_location
+────────────────────────────────────────────────────────────────────────────────
+Model: stock.location
+Purpose: Get warehouse/location information
+Business Use Case: "What warehouses do we have?" "Where is Warehouse A?"
+
+Parameters:
+  - location_id (optional, int): Specific location
+  - usage (optional, string): Filter by type (internal/customer/supplier/transit)
+
+Returns:
+  - id, name, complete_name (full path)
+  - usage, company_id
+
+Domain Restrictions:
+  - usage = 'internal' (company warehouses only)
+
+Why Required:
+  Context for inventory locations. Understanding where stock is stored.
+
+
+================================================================================
+SECTION 5: SALES ORDER MANAGEMENT
+================================================================================
+Risk Level: LOW (Read) | MEDIUM (Create orders with validation)
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 021
+Tool Name: get_sale_order
+────────────────────────────────────────────────────────────────────────────────
+Model: sale.order
+Purpose: Get sales order details
+Business Use Case: "What's the status of order SO123?" "Show customer X's orders"
+
+Risk Level: LOW (Read Only)
+
+Parameters:
+  - order_id (optional, int): Specific order
+  - name (optional, string): Search by order number
+  - partner_id (optional, int): Filter by customer
+  - state (optional, string): Filter by status (draft/sent/sale/done/cancel)
+  - date_from (optional, date): Filter orders after date
+  - date_to (optional, date): Filter orders before date
+  - limit (optional, int, default=10, max=100)
+
+Returns:
+  - id, name (order number)
+  - partner_id, partner_name (customer)
+  - date_order, validity_date
+  - amount_total, amount_tax, amount_untaxed
+  - state (draft/sent/sale/done/cancel)
+  - user_id (salesperson)
+
+Domain Restrictions:
+  - company_id = current_company
+
+Why Required:
+  Core order tracking. "What's the status of customer X's order?"
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 022
+Tool Name: get_sale_order_lines
+────────────────────────────────────────────────────────────────────────────────
+Model: sale.order.line
+Purpose: Get line items (products) in a sales order
+Business Use Case: "What products are in order SO123?"
+
+Parameters:
+  - order_id (int, required): Sales order
+
+Returns:
+  - id, order_id
+  - product_id, product_name
+  - product_uom_qty (quantity ordered)
+  - price_unit, price_subtotal, price_total
+  - discount (if applicable)
+
+Why Required:
+  Understanding order contents. Can't analyze orders without
+  knowing what products were ordered.
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 023
+Tool Name: create_sale_order
+────────────────────────────────────────────────────────────────────────────────
+Model: sale.order + sale.order.line
+Purpose: Create new sales order
+Business Use Case: "Create order for Customer X: 100 units of Product Y"
+
+Risk Level: MEDIUM (Create with heavy validation)
+
+Parameters (Required):
+  - partner_id (int): Customer
+  - order_lines (list of dicts): Products to order
+    Each line: {
+      product_id (int),
+      product_uom_qty (float),
+      price_unit (float, optional - defaults to product list_price)
+    }
+
+Parameters (Optional):
+  - date_order (date, defaults to today)
+  - validity_date (date)
+  - note (text): Order notes
+
+Forbidden Parameters:
+  - company_id (auto-set)
+  - state (must start as 'draft')
+  - Any financial override fields
+
+Validation Rules (CRITICAL):
+  1. Partner must exist and be a customer (is_customer=True)
+  2. All products must exist and be sellable (sale_ok=True)
+  3. Check inventory availability for each product
+  4. Price must not be manually overridden (use product list_price)
+  5. Order total must be calculated by Odoo, not provided
+
+Returns:
+  - Created order_id, order_name
+  - partner_id, partner_name
+  - amount_total
+  - state ('draft')
+  - Line item summary
+
+Post-Creation:
+  - Order remains in 'draft' state
+  - Requires human confirmation before processing
+
+Why Required:
+  Core automation capability. AI can draft orders based on
+  customer requests, but humans must confirm before processing.
+  Heavy validation prevents pricing errors or invalid orders.
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 024
+Tool Name: get_customer_order_history
+────────────────────────────────────────────────────────────────────────────────
+Model: sale.order (filtered)
+Purpose: Get all orders from a specific customer
+Business Use Case: "What has Customer X ordered before?" "Order frequency?"
+
+Parameters:
+  - partner_id (int, required): Customer
+
+Returns:
+  - List of orders with: id, name, date_order, amount_total, state
+  - Summary: total_orders, total_revenue, average_order_value
+  - Most recent order date
+
+Why Required:
+  Customer relationship context. Understanding buying patterns.
+
+
+================================================================================
+SECTION 6: PURCHASING / PROCUREMENT
+================================================================================
+Risk Level: LOW (Read Only) - No purchase order creation
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 025
+Tool Name: get_purchase_order
+────────────────────────────────────────────────────────────────────────────────
+Model: purchase.order
+Purpose: Get purchase order details (incoming materials)
+Business Use Case: "What materials are we expecting?" "Supplier delivery dates?"
+
+Parameters:
+  - order_id (optional, int): Specific PO
+  - partner_id (optional, int): Filter by supplier
+  - state (optional, string): Filter by status
+  - date_from (optional, date): Expected delivery after
+
+Returns:
+  - id, name, partner_id (supplier)
+  - date_order, date_planned (expected delivery)
+  - amount_total, state
+
+Domain Restrictions:
+  - company_id = current_company
+
+Why Required:
+  Visibility into incoming inventory. Answering: "When will we
+  receive materials needed for manufacturing?"
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 026
+Tool Name: get_purchase_order_lines
+────────────────────────────────────────────────────────────────────────────────
+Model: purchase.order.line
+Purpose: Get line items in purchase order
+Business Use Case: "What did we order from Supplier X?"
+
+Parameters:
+  - order_id (int, required): Purchase order
+
+Returns:
+  - product_id, product_name
+  - product_qty, price_unit
+  - date_planned (expected delivery)
+
+Why Required:
+  Understanding what materials are incoming and when.
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 027
+Tool Name: check_material_availability
+────────────────────────────────────────────────────────────────────────────────
+Model: stock.quant + purchase.order (COMPOSITE TOOL)
+Purpose: Check if raw materials available (current + incoming)
+Business Use Case: "Do we have materials to manufacture 100 units?"
+
+Parameters:
+  - product_id (int, required): Material to check
+  - quantity_needed (float, required): Required quantity
+  - date_needed (date, optional): When needed
+
+Returns:
+  - product_id, product_name
+  - current_stock
+  - incoming_qty (from approved POs)
+  - total_available (current + incoming)
+  - can_fulfill (boolean)
+  - expected_available_date (if insufficient now but POs pending)
+
+Logic:
+  1. Check current stock
+  2. Check purchase orders with state='purchase' (approved)
+  3. Sum incoming materials with date_planned <= date_needed
+  4. Calculate total availability
+
+Why Required:
+  Manufacturing feasibility. Can't produce without materials.
+  This answers: "Can we manufacture X units by date Y?"
+
+
+================================================================================
+SECTION 7: MANUFACTURING (If MRP Module Installed)
+================================================================================
+Risk Level: LOW (Read Only) - No production order creation
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 028
+Tool Name: get_manufacturing_order
+────────────────────────────────────────────────────────────────────────────────
+Model: mrp.production
+Purpose: Get manufacturing/production order details
+Business Use Case: "What's the production schedule?" "Is Product X being manufactured?"
+
+Parameters:
+  - production_id (optional, int): Specific MO
+  - product_id (optional, int): Filter by product
+  - state (optional, string): Filter by status
+  - date_from (optional, date): Planned start after
+
+Returns:
+  - id, name, product_id, product_qty
+  - date_planned_start, date_planned_finished
+  - state (draft/confirmed/progress/done/cancel)
+
+Domain Restrictions:
+  - company_id = current_company
+
+Why Required:
+  Production visibility. Understanding manufacturing capacity
+  and timeline. Critical for "can we manufacture?" questions.
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 029
+Tool Name: check_manufacturing_capacity
+────────────────────────────────────────────────────────────────────────────────
+Model: mrp.production (AGGREGATION TOOL)
+Purpose: Check available manufacturing capacity
+Business Use Case: "Can we schedule manufacturing for 200 units next week?"
+
+Parameters:
+  - date_from (date, required): Check capacity from this date
+  - date_to (date, required): Check capacity until this date
+
+Returns:
+  - date_range: from/to
+  - scheduled_orders: count of MOs in this period
+  - total_scheduled_qty: sum of product quantities being manufactured
+  - estimated_capacity_used (percentage, if capacity defined)
+  - available_capacity: estimated free capacity
+
+Logic:
+  1. Get all MOs with date_planned_start in range
+  2. Sum quantities by week
+  3. Estimate capacity usage
+  4. Return availability summary
+
+Why Required:
+  Resource planning. Can't commit to manufacturing dates without
+  knowing current capacity usage.
+
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 030
+Tool Name: get_bill_of_materials
+────────────────────────────────────────────────────────────────────────────────
+Model: mrp.bom
+Purpose: Get materials needed to manufacture a product
+Business Use Case: "What components needed to make Product X?"
+
+Parameters:
+  - product_id (int, required): Product to manufacture
+
+Returns:
+  - product_id, product_name
+  - bom_line_ids: list of components with:
+    - component_id, component_name
+    - product_qty (quantity per unit)
+
+Why Required:
+Understanding material requirements for production planning.
+================================================================================
+SECTION 8: ACCOUNTING / FINANCE
+Risk Level: LOW (Read Only) - No invoice or payment creation
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 031
+Tool Name: get_customer_invoices
+────────────────────────────────────────────────────────────────────────────────
+Model: account.move
+Purpose: Get customer invoices
+Business Use Case: "What invoices has Customer X received?" "Outstanding invoices?"
+Parameters:
+
+partner_id (optional, int): Filter by customer
+move_type (optional, string): 'out_invoice' or 'out_refund'
+payment_state (optional, string): Filter by payment status
+invoice_date_from (optional, date)
+invoice_date_to (optional, date)
+
+Returns:
+
+id, name (invoice number)
+partner_id, partner_name
+invoice_date, invoice_date_due
+amount_total, amount_residual (unpaid amount)
+payment_state (not_paid/in_payment/paid)
+state (draft/posted/cancel)
+
+Domain Restrictions:
+
+company_id = current_company
+move_type IN ('out_invoice', 'out_refund')
+
+Why Required:
+Financial visibility. Understanding customer payment status,
+outstanding invoices, payment history.
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 032
+Tool Name: check_customer_credit
+────────────────────────────────────────────────────────────────────────────────
+Model: res.partner + account.move (COMPOSITE TOOL)
+Purpose: Check customer credit limit and outstanding balance
+Business Use Case: "Can Customer X afford a $50k order?" "Credit availability?"
+Parameters:
+
+partner_id (int, required): Customer to check
+
+Returns:
+
+partner_id, partner_name
+credit_limit (max allowed credit)
+total_due (current outstanding invoices)
+available_credit (credit_limit - total_due)
+can_extend_credit (boolean)
+overdue_invoices: count and total amount
+
+Logic:
+
+Get partner credit_limit
+Sum amount_residual from unpaid invoices
+Calculate available credit
+Check for overdue invoices
+
+Why Required:
+CRITICAL for order approval. Can't create orders for customers
+who exceeded credit limits. Prevents bad debt.
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 033
+Tool Name: get_payment_history
+────────────────────────────────────────────────────────────────────────────────
+Model: account.payment
+Purpose: Get customer payment records
+Business Use Case: "What's Customer X's payment track record?"
+Parameters:
+
+partner_id (int, required): Customer
+
+Returns:
+
+List of payments: id, payment_date, amount, state
+Summary: total_payments, average_days_to_pay
+Payment reliability score (good/fair/poor)
+
+Why Required:
+Credit risk assessment. Understanding if customer pays on time.
+================================================================================
+SECTION 9: COMPOSITE / CROSS-DOMAIN TOOLS
+These tools combine data from multiple modules for complex business questions.
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 034
+Tool Name: check_order_fulfillment_feasibility
+────────────────────────────────────────────────────────────────────────────────
+Models: res.partner + product.product + stock.quant + sale.order +
+mrp.production + hr.employee
+Purpose: Comprehensive order feasibility analysis
+Business Use Case: "Can we fulfill Customer X's order for 200 units by Dec 15?"
+Risk Level: LOW (Read Only, but complex aggregation)
+Parameters (Required):
+
+partner_id (int): Customer
+product_id (int): Product
+quantity (float): Requested quantity
+date_required (date): Delivery deadline
+
+Returns (Comprehensive Report):
+customer_analysis:
+- name, credit_limit, available_credit
+- payment_history_score
+- credit_approved (boolean)
+inventory_analysis:
+- current_stock
+- reserved_stock
+- available_stock
+- can_ship_from_stock (boolean)
+- shortage_qty (if any)
+manufacturing_analysis (if stock insufficient):
+- materials_available (boolean)
+- production_capacity_available (boolean)
+- estimated_production_days
+- can_manufacture_on_time (boolean)
+resource_analysis:
+- staff_availability (manufacturing staff available)
+- overtime_required (boolean)
+overall_recommendation:
+- can_fulfill (boolean)
+- recommended_delivery_date
+- confidence_level (high/medium/low)
+- risks: list of potential issues
+- action_items: what needs to happen
+Logic Flow:
+
+Verify customer exists and credit OK
+Check product inventory
+If sufficient stock → recommend ship from stock
+If insufficient stock:
+a. Check if product can be manufactured
+b. Check material availability
+c. Check manufacturing capacity
+d. Check staff availability
+Calculate earliest realistic delivery date
+Generate comprehensive recommendation
+
+Why Required:
+This is THE MOST IMPORTANT TOOL for the entire system.
+This single tool answers the core business question from the
+problem statement: "Can we fulfill this order?"
+Without this, AI would need to make 10+ separate tool calls
+and manually synthesize the data. This tool does it in one call.
+────────────────────────────────────────────────────────────────────────────────
+Tool ID: 035
+Tool Name: analyze_customer_relationship
+────────────────────────────────────────────────────────────────────────────────
+Models: res.partner + crm.lead + sale.order + account.move
+Purpose: Complete customer relationship analysis
+Business Use Case: "Give me full picture of Customer X"
+Parameters:
+
+partner_id (int, required): Customer
+
+Returns:
+
+Customer profile summary
+Total lifetime value (all orders)
+Open opportunities (count and value)
+Payment behavior (average days to pay, overdue count)
+Recent activity timeline
+Relationship health score (excellent/good/fair/poor)
+Recommended actions
+
+Why Required:
+360-degree customer view for relationship management.
+================================================================================
+TOOL COUNT SUMMARY
+Core Infrastructure:        4 tools  (001-004)
+HR Management:              6 tools  (005-010)
+CRM:                        6 tools  (011-016)
+Inventory:                  4 tools  (017-020)
+Sales Orders:               4 tools  (021-024)
+Purchasing:                 3 tools  (025-027)
+Manufacturing:              3 tools  (028-030)
+Accounting:                 3 tools  (031-033)
+Composite/Analytics:        2 tools  (034-035)
+TOTAL:                     35 TOOLS
+Risk Breakdown:
+
+Read-only (Low Risk):    28 tools (80%)
+Create-only (Medium):     6 tools (17%)
+Update (High):            1 tool  (3%)
+Delete:                   0 tools (0%)
+
+================================================================================
